@@ -1,0 +1,18 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "not-rely-on-time": "off",
+    "reason-string": "off",
+    "func-visibility": [
+      "warn",
+      {
+        "ignoreConstructors": true
+      }
+    ],
+    "compiler-version": ["error", "^0.8.0"],
+    "func-param-name-mixedcase": "error",
+    "modifier-name-mixedcase": "error",
+    "ordering": "error",
+    "private-vars-leading-underscore": "error"
+  }
+}
