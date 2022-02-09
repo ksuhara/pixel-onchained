@@ -212,7 +212,9 @@ const Home: NextPage = () => {
             >
               ①Select your Pixel Art
             </Button>
-            <Text mt="2">Must be 32×32 png file</Text>
+            <Text mt="2">
+              Must be 32×32 png file. Colors should be less than 256
+            </Text>
           </Box>
           <Icon as={FaAngleDoubleDown} w={8} h={8}></Icon>
 
