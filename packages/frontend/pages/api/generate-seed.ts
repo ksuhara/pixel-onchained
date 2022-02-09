@@ -17,8 +17,10 @@ export default function handler(
   const encoder = new PNGCollectionEncoder();
   const buff = Buffer.from(req.body.file.split(",")[1], "base64");
   const image = decode(buff);
+  if (image.height != 32 || image.width != 32) {
+    throw new Error("Must be 32*32 png");
+  }
   const { rle, hexColors } = encoder.encodeImage("", image);
-  console.log(hexColors, "hexColors");
   const svg = buildSVG([{ data: rle }], hexColors);
   res.status(200).json({
     rle,

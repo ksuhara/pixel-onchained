@@ -1,1 +1,1 @@
-# pixeles-onchained
+# pixel-onchained
