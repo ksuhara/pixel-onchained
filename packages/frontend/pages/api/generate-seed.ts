@@ -21,6 +21,9 @@ export default function handler(
     throw new Error("Must be 32*32 png");
   }
   const { rle, hexColors } = encoder.encodeImage("", image);
+  if (hexColors.length > 256) {
+    throw new Error("Color must be less than 256");
+  }
   const svg = buildSVG([{ data: rle }], hexColors);
   res.status(200).json({
     rle,
