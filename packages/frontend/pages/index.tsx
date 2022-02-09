@@ -175,9 +175,9 @@ const Home: NextPage = () => {
               Ready to Onchain?
             </Heading>
             <Text mt="4" fontSize="lg">
-              Full-Onchain your pixel art and immutable it. Using Polygon chain
-              right now.
+              Mint your Full-Onchain pixel art NFT and immutable it.
             </Text>
+            <Text fontSize="lg">Using Polygon chain right now.</Text>
             <Button
               mt="8"
               size="lg"
