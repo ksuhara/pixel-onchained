@@ -1,5 +1,5 @@
 {
-  "name": "pixeles-onchained",
+  "name": "pixel-onchained",
   "version": "1.0.0",
   "private": true,
   "description": "",
@@ -12,13 +12,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ksuhara/pixeles-onchained.git"
+    "url": "git+https://github.com/ksuhara/pixel-onchained.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ksuhara/pixeles-onchained/issues"
+    "url": "https://github.com/ksuhara/pixel-onchained/issues"
   },
-  "homepage": "https://github.com/ksuhara/pixeles-onchained#readme"
+  "homepage": "https://github.com/ksuhara/pixel-onchained#readme"
 }
