@@ -21,7 +21,7 @@ import { ethers } from "ethers";
 import { Header } from "../components/Header";
 import { FaAngleDoubleDown, FaCheckCircle } from "react-icons/fa";
 
-const contractAddress = "0x25aEB6785C52C8A0F0bAa2F6de29D8cDF6f1E77C";
+const contractAddress = "0x4A63732DF3c7aF46b16ea1D228C1b7B9DE480490";
 const abi = contract.abi;
 
 declare global {
@@ -147,6 +147,25 @@ const Home: NextPage = () => {
 
   React.useEffect(() => {
     checkWalletIsConnected();
+    const data = [
+      {
+        chainId: "0x89",
+        chainName: "Matic Network",
+        nativeCurrency: {
+          name: "Matic",
+          symbol: "Matic",
+          decimals: 18,
+        },
+        rpcUrls: ["https://rpc-mainnet.matic.network/"],
+        blockExplorerUrls: ["https://polygonscan.com/"],
+      },
+    ];
+    if (window.ethereum) {
+      window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: data,
+      });
+    }
   }, []);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -178,6 +197,12 @@ const Home: NextPage = () => {
               Mint your Full-Onchain pixel art NFT and immutable it.
             </Text>
             <Text fontSize="lg">Using Polygon chain right now.</Text>
+            <Link
+              href={`https://opensea.io/collection/pixel-onchained`}
+              isExternal
+            >
+              <Text mx="2">{`view the collection on OpenSea`}</Text>
+            </Link>
             <Button
               mt="8"
               size="lg"
@@ -278,15 +303,12 @@ const Home: NextPage = () => {
               direction={{ base: "column", sm: "row" }}
               alignItems={"center"}
             >
-              <Link
-                href={`https://rinkeby.etherscan.io/tx/${txHash}`}
-                isExternal
-              >
+              <Link href={`https://polygonscan.com/tx/${txHash}`} isExternal>
                 <Text
                   mx="2"
                   isTruncated
                   w={{ base: "sm", sm: "md" }}
-                >{`see transaction: https://rinkeby.etherscan.io/tx/${txHash}`}</Text>
+                >{`see transaction: https://polygonscan.com/tx/${txHash}`}</Text>
               </Link>
               {mintingStatus == "started" && <Spinner />}
               {mintingStatus == "ended" && (
