@@ -103,6 +103,7 @@ const Home: NextPage = () => {
 
     if (!ethereum) {
       alert("Please install Metamask!");
+      window.open("https://metamask.app.link/dapp/megabots.tokyo/");
     }
 
     try {
