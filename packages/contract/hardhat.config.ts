@@ -29,6 +29,12 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   networks: {
+    hardhat: {
+      chainId: 31337,
+      forking: {
+        url: "https://polygon-mainnet.infura.io/v3/7495501b681645b0b80f955d4139add9",
+      },
+    },
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/95f65ab099894076814e8526f52c9149",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],

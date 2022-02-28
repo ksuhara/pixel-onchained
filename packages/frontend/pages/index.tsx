@@ -12,6 +12,9 @@ import {
   Spinner,
   Flex,
   Link,
+  HStack,
+  VStack,
+  Select,
 } from "@chakra-ui/react";
 import axios from "axios";
 import type { NextPage } from "next";
@@ -20,9 +23,9 @@ import contract from "../constants/contract.json";
 import { ethers } from "ethers";
 import { Header } from "../components/Header";
 import { FaAngleDoubleDown, FaCheckCircle } from "react-icons/fa";
+import { getContractsForChainId, ChainId, explorers } from "../lib/web3";
 
-const contractAddress = "0x4A63732DF3c7aF46b16ea1D228C1b7B9DE480490";
-const abi = contract.abi;
+const { fllnchnAbi, chocofactoryAbi } = contract;
 
 declare global {
   interface Window {
@@ -31,6 +34,10 @@ declare global {
 }
 
 const Home: NextPage = () => {
+  const [chainId, setChainId] = React.useState<ChainId>("4");
+  const [contractName, setContractName] = React.useState("");
+  const [symbol, setSymbol] = React.useState("");
+  const [moldAddress, setMoldAddress] = React.useState("");
   const [image, setImage] = React.useState("");
   const [rle, setRle] = React.useState("");
   const [svgString, setSvgString] = React.useState("");
@@ -40,6 +47,8 @@ const Home: NextPage = () => {
   const [error, setError] = React.useState("");
   const [mintingStatus, setMintingStatus] = React.useState("ended");
   const [txHash, setTxHash] = React.useState("");
+  const [deployStatus, setDeployStatus] = React.useState("ended");
+  const [deployTxHash, setDeployTxHash] = React.useState("");
 
   const generateSeed = (event: any) => {
     event.preventDefault();
@@ -126,10 +135,19 @@ const Home: NextPage = () => {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const nftContract = new ethers.Contract(contractAddress, abi, signer);
+        const { fllnchnMoldAddress } = getContractsForChainId(chainId);
+        const moldContract = new ethers.Contract(
+          fllnchnMoldAddress,
+          fllnchnAbi,
+          provider
+        );
+
         const address = signer.getAddress();
 
-        let nftTxn = await nftContract.mintNFT(name, rle, colors, address);
+        let nftTxn = await moldContract
+          .attach(moldAddress)
+          .connect(signer)
+          .mintNFT(name, rle, colors, address);
 
         console.log("Mining... please wait");
         setMintingStatus("started");
@@ -150,25 +168,25 @@ const Home: NextPage = () => {
 
   React.useEffect(() => {
     checkWalletIsConnected();
-    const data = [
-      {
-        chainId: "0x89",
-        chainName: "Matic Network",
-        nativeCurrency: {
-          name: "Matic",
-          symbol: "Matic",
-          decimals: 18,
-        },
-        rpcUrls: ["https://rpc-mainnet.matic.network/"],
-        blockExplorerUrls: ["https://polygonscan.com/"],
-      },
-    ];
-    if (window.ethereum) {
-      window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: data,
-      });
-    }
+    // const data = [
+    //   {
+    //     chainId: "0x89",
+    //     chainName: "Matic Network",
+    //     nativeCurrency: {
+    //       name: "Matic",
+    //       symbol: "Matic",
+    //       decimals: 18,
+    //     },
+    //     rpcUrls: ["https://rpc-mainnet.matic.network/"],
+    //     blockExplorerUrls: ["https://polygonscan.com/"],
+    //   },
+    // ];
+    // if (window.ethereum) {
+    //   window.ethereum.request({
+    //     method: "wallet_addEthereumChain",
+    //     params: data,
+    //   });
+    // }
   }, []);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -179,6 +197,38 @@ const Home: NextPage = () => {
     setSvgString("");
     setError("");
     inputRef.current?.click();
+  };
+
+  const deployNewContract = async () => {
+    const { ethereum } = window;
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    console.log(chainId);
+    const { chocofactoryAddress, fllnchnMoldAddress } =
+      getContractsForChainId(chainId);
+    const chocofactoryContract = new ethers.Contract(
+      chocofactoryAddress,
+      chocofactoryAbi,
+      provider
+    );
+
+    const signerAddress = await signer.getAddress();
+    const deployedMold = await chocofactoryContract.predictDeployResult(
+      fllnchnMoldAddress,
+      signerAddress,
+      contractName,
+      symbol
+    );
+    let deployTxn = await chocofactoryContract
+      .connect(signer)
+      .deploy(fllnchnMoldAddress, contractName, symbol);
+
+    setDeployStatus("started");
+    setDeployTxHash(deployTxn.hash);
+    await deployTxn.wait();
+    setDeployStatus("ended");
+    setMoldAddress(deployedMold);
+    console.log(deployedMold, "deployedMold");
   };
 
   return (
@@ -199,21 +249,103 @@ const Home: NextPage = () => {
             <Text mt="4" fontSize="lg">
               Mint your Full-Onchain pixel art NFT and immutable it.
             </Text>
-            <Text fontSize="lg">Using Polygon chain right now.</Text>
-            <Link
-              href={`https://opensea.io/collection/pixel-onchained`}
-              isExternal
+          </Box>
+          <Box my="8">
+            <Heading mt="2" fontSize="xl">
+              ① Select Chain
+            </Heading>
+            <Select
+              w={{ base: "xs", sm: "md" }}
+              mx="auto"
+              onChange={(e) => setChainId(e.target.value as ChainId)}
+              value={chainId}
             >
-              <Text mx="2">{`view the collection on OpenSea`}</Text>
-            </Link>
+              <option value="4">Rinkeby</option>
+              <option value="137">Polygon mainnet</option>
+            </Select>
+          </Box>
+          <VStack my="8">
+            <Heading mt="2" fontSize="xl">
+              ②Deploy new contract ※First timers only.
+            </Heading>
+            <Text mt="2">
+              If you already have a contract, please skip this and proceed to ②
+              Input your contract address.
+            </Text>
+            <Input
+              placeholder="contract name(=collection name)"
+              my="1"
+              w={{ base: "xs", sm: "md" }}
+              variant="filled"
+              value={contractName}
+              onChange={(e) => setContractName(e.target.value)}
+            ></Input>
+            <Input
+              placeholder="symbol"
+              my="1"
+              w={{ base: "xs", sm: "md" }}
+              variant="filled"
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
+            ></Input>
+            <Button
+              mt="8"
+              size="lg"
+              colorScheme="blue"
+              fontWeight="bold"
+              onClick={deployNewContract}
+            >
+              Deploy
+            </Button>
+            {deployTxHash && (
+              <Center>
+                <Flex
+                  direction={{ base: "column", sm: "row" }}
+                  alignItems={"center"}
+                >
+                  <Link
+                    href={`${explorers[chainId]}tx/${deployTxHash}`}
+                    isExternal
+                  >
+                    <Text
+                      mx="2"
+                      isTruncated
+                      w={{ base: "sm", sm: "md" }}
+                    >{`see transaction: ${explorers[chainId]}tx/${deployTxHash}`}</Text>
+                  </Link>
+                  {deployStatus == "started" && <Spinner />}
+                  {deployStatus == "ended" && (
+                    <Icon as={FaCheckCircle} w={8} h={8} color="green"></Icon>
+                  )}
+                </Flex>
+              </Center>
+            )}
+            <Text mt="2">
+              Write this contract address down and keep it for yourself. This
+              service will not save it.
+            </Text>
+            <Heading mt="2" fontSize="xl">
+              ② Input your contract address
+            </Heading>
+            <Input
+              placeholder="0x..."
+              my="1"
+              w={{ base: "xs", sm: "md" }}
+              variant="filled"
+              value={moldAddress}
+              onChange={(e) => setMoldAddress(e.target.value)}
+            ></Input>
+          </VStack>
+          <Box>
             <Button
               mt="8"
               size="lg"
               colorScheme="blue"
               fontWeight="bold"
               onClick={onClickButton}
+              disabled={!moldAddress}
             >
-              ①Select your Pixel Art
+              ③Select your Pixel Art
             </Button>
             <Text mt="2">
               Must be 32×32 png file. Colors should be less than 256
@@ -249,8 +381,9 @@ const Home: NextPage = () => {
               fontWeight="bold"
               type="submit"
               name="upload"
+              disabled={!image}
             >
-              ②Generate SVG
+              ④Generate SVG
             </Button>
           </form>
         </Box>
@@ -288,8 +421,9 @@ const Home: NextPage = () => {
             colorScheme="blue"
             fontWeight="bold"
             onClick={mintNftHandler}
+            disabled={!svgString}
           >
-            ③Mint Pixel
+            ⑤Mint Pixel
           </Button>
         ) : (
           <Button
@@ -308,12 +442,12 @@ const Home: NextPage = () => {
               direction={{ base: "column", sm: "row" }}
               alignItems={"center"}
             >
-              <Link href={`https://polygonscan.com/tx/${txHash}`} isExternal>
+              <Link href={`${explorers[chainId]}tx/${txHash}`} isExternal>
                 <Text
                   mx="2"
                   isTruncated
                   w={{ base: "sm", sm: "md" }}
-                >{`see transaction: https://polygonscan.com/tx/${txHash}`}</Text>
+                >{`see transaction: ${explorers[chainId]}tx/${txHash}`}</Text>
               </Link>
               {mintingStatus == "started" && <Spinner />}
               {mintingStatus == "ended" && (
