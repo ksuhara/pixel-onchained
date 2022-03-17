@@ -262,6 +262,7 @@ const Home: NextPage = () => {
             >
               <option value="4">Rinkeby</option>
               <option value="137">Polygon mainnet</option>
+              <option value="592">Astar mainnet</option>
             </Select>
           </Box>
           <VStack my="8">
@@ -304,14 +305,14 @@ const Home: NextPage = () => {
                   alignItems={"center"}
                 >
                   <Link
-                    href={`${explorers[chainId]}tx/${deployTxHash}`}
+                    href={`${explorers[chainId]}${deployTxHash}`}
                     isExternal
                   >
                     <Text
                       mx="2"
                       isTruncated
                       w={{ base: "sm", sm: "md" }}
-                    >{`see transaction: ${explorers[chainId]}tx/${deployTxHash}`}</Text>
+                    >{`see transaction: ${explorers[chainId]}${deployTxHash}`}</Text>
                   </Link>
                   {deployStatus == "started" && <Spinner />}
                   {deployStatus == "ended" && (
@@ -442,12 +443,12 @@ const Home: NextPage = () => {
               direction={{ base: "column", sm: "row" }}
               alignItems={"center"}
             >
-              <Link href={`${explorers[chainId]}tx/${txHash}`} isExternal>
+              <Link href={`${explorers[chainId]}${txHash}`} isExternal>
                 <Text
                   mx="2"
                   isTruncated
                   w={{ base: "sm", sm: "md" }}
-                >{`see transaction: ${explorers[chainId]}tx/${txHash}`}</Text>
+                >{`see transaction: ${explorers[chainId]}${txHash}`}</Text>
               </Link>
               {mintingStatus == "started" && <Spinner />}
               {mintingStatus == "ended" && (

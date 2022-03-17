@@ -43,6 +43,10 @@ const config: HardhatUserConfig = {
       url: "https://polygon-mainnet.infura.io/v3/7495501b681645b0b80f955d4139add9",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    astar: {
+      url: "https://rpc.astar.bldnodes.org",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
